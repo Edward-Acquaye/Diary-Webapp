@@ -1,92 +1,50 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import os
-import datetime
+from datetime import timedelta
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key_here"
+app.secret_key = 'your-secret-key'  # Replace with a secure key in production
+app.permanent_session_lifetime = timedelta(minutes=30)
 
-# ---------- Helpers ----------
+# Simulated user data (replace this with a real database in production)
+users = {
+    "admin": "password",  # In production, store hashed passwords!
+}
 
-def load_users():
-    users = {}
-    if os.path.exists("users.txt"):
-        with open("users.txt", "r") as f:
-            for line in f:
-                username, password = line.strip().split(",")
-                users[username] = password
-    return users
-
-def save_user(username, password):
-    with open("users.txt", "a") as f:
-        f.write(f"{username},{password}\n")
-
-def diary_path(username):
-    return os.path.join("diaries", f"{username}_diary.txt")
-
-# ---------- Routes ----------
-
-@app.route('/')
+@app.route("/")
 def home():
-    if 'username' in session:
-        return redirect(url_for('diary'))
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        users = load_users()
-        username = request.form['username']
-        password = request.form['password']
-        if username in users:
-            flash("Username already exists.")
-        else:
-            save_user(username, password)
-            session['username'] = username
-            return redirect(url_for('diary'))
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        users = load_users()
-        username = request.form['username']
-        password = request.form['password']
-        if users.get(username) == password:
-            session['username'] = username
-            return redirect(url_for('diary'))
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        
+        # Check if user exists
+        if username in users and users[username] == password:
+            session.permanent = True
+            session["user"] = username
+            flash("Login successful!", "info")
+            return redirect(url_for("dashboard"))
         else:
-            flash("Invalid credentials.")
-    return render_template('login.html')
+            flash("Invalid credentials. Try again.", "danger")
+            return render_template("login.html")
+    
+    return render_template("login.html")
 
-@app.route('/logout')
+@app.route("/dashboard")
+def dashboard():
+    if "user" in session:
+        return f"Welcome to your diary, {session['user']}! <br><a href='/logout'>Logout</a>"
+    else:
+        flash("You must log in first.", "warning")
+        return redirect(url_for("login"))
+
+@app.route("/logout")
 def logout():
-    session.pop('username', None)
-    return redirect(url_for('login'))
-
-@app.route('/diary', methods=['GET', 'POST'])
-def diary():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    username = session['username']
-    path = diary_path(username)
-
-    if request.method == 'POST':
-        entry = request.form['entry']
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(path, 'a') as f:
-            f.write(f"[{now}] {entry}\n")
-
-    entries = []
-    if os.path.exists(path):
-        with open(path, 'r') as f:
-            entries = f.readlines()
-
-    return render_template('diary.html', username=username, entries=entries)
-
-# ---------- Start App ----------
+    session.pop("user", None)
+    flash("You have been logged out.", "info")
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
-    if not os.path.exists("diaries"):
-        os.makedirs("diaries")
     app.run(debug=True)
