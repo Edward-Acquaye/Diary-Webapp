@@ -1,0 +1,18 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.card-body {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
