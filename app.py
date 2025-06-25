@@ -90,6 +90,10 @@ def journal():
     entries = JournalEntry.query.filter_by(user_id=session['user_id']).order_by(JournalEntry.timestamp.desc()).all()
     return render_template('journal.html', entries=entries)
 
+@app.shell_context_processor
+def make_shell_context():
+    return {'db': db, 'User': User, 'JournalEntry': JournalEntry}
+
 # --- Run & Create Database ---
 if __name__ == '__main__':
     with app.app_context():
