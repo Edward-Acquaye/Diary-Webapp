@@ -24,6 +24,10 @@ class JournalEntry(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+# ✅ Ensure tables are created even on Render
+with app.app_context():
+    db.create_all()
+
 # --- Routes ---
 @app.route('/')
 def home():
@@ -94,8 +98,6 @@ def journal():
 def make_shell_context():
     return {'db': db, 'User': User, 'JournalEntry': JournalEntry}
 
-# --- Run & Create Database ---
+# --- Run App Locally ---
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
