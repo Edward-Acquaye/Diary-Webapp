@@ -1,50 +1,97 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from datetime import timedelta
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
+# --- App and Database Setup ---
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # Replace with a secure key in production
-app.permanent_session_lifetime = timedelta(minutes=30)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///diary.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'your_secret_key_here'  # Change this to a secure secret key!
+db = SQLAlchemy(app)
 
-# Simulated user data (replace this with a real database in production)
-users = {
-    "admin": "password",  # In production, store hashed passwords!
-}
+# --- Models ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    entries = db.relationship('JournalEntry', backref='author', lazy=True)
 
-@app.route("/")
+class JournalEntry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+# --- Routes ---
+@app.route('/')
 def home():
-    return redirect(url_for("login"))
+    return render_template('home.html')
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password']
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists. Please choose another.', 'danger')
+            return redirect(url_for('register'))
+
+        hashed_pw = generate_password_hash(password)
+        new_user = User(username=username, password=hashed_pw)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Registration successful! Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        
-        # Check if user exists
-        if username in users and users[username] == password:
-            session.permanent = True
-            session["user"] = username
-            flash("Login successful!", "info")
-            return redirect(url_for("dashboard"))
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            flash('Login successful!', 'success')
+            return redirect(url_for('journal'))
         else:
-            flash("Invalid credentials. Try again.", "danger")
-            return render_template("login.html")
-    
-    return render_template("login.html")
+            flash('Invalid credentials. Please try again.', 'danger')
 
-@app.route("/dashboard")
-def dashboard():
-    if "user" in session:
-        return f"Welcome to your diary, {session['user']}! <br><a href='/logout'>Logout</a>"
-    else:
-        flash("You must log in first.", "warning")
-        return redirect(url_for("login"))
+    return render_template('login.html')
 
-@app.route("/logout")
+@app.route('/logout')
 def logout():
-    session.pop("user", None)
-    flash("You have been logged out.", "info")
-    return redirect(url_for("login"))
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('home'))
 
-if __name__ == "__main__":
+@app.route('/journal', methods=['GET', 'POST'])
+def journal():
+    if 'user_id' not in session:
+        flash('Please log in to view your journal.', 'warning')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        title = request.form['title'].strip()
+        content = request.form['content'].strip()
+        new_entry = JournalEntry(title=title, content=content, user_id=session['user_id'])
+        db.session.add(new_entry)
+        db.session.commit()
+        flash('Journal entry added!', 'success')
+        return redirect(url_for('journal'))
+
+    entries = JournalEntry.query.filter_by(user_id=session['user_id']).order_by(JournalEntry.timestamp.desc()).all()
+    return render_template('journal.html', entries=entries)
+
+# --- Run & Create Database ---
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
