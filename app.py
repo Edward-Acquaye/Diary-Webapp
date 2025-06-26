@@ -7,15 +7,15 @@ from datetime import datetime
 # --- App and Database Setup ---
 app = Flask(__name__)
 
-# ✅ Use PostgreSQL from Render or fallback to SQLite locally
+# ✅ Use PostgreSQL on Render or fallback to SQLite locally
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///diary.db')
 
-# ✅ Convert postgres:// to postgresql:// for SQLAlchemy compatibility
+# ✅ Fix Render's postgres:// URI
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_dev_secret')  # Use secure key in production
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_dev_secret')
 
 db = SQLAlchemy(app)
 
@@ -32,6 +32,10 @@ class JournalEntry(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+# ✅ Ensure tables are created even on Render
+with app.app_context():
+    db.create_all()
 
 # --- Routes ---
 @app.route('/')
@@ -99,13 +103,11 @@ def journal():
     entries = JournalEntry.query.filter_by(user_id=session['user_id']).order_by(JournalEntry.timestamp.desc()).all()
     return render_template('journal.html', entries=entries)
 
-# --- Shell Context (for debugging) ---
+# --- Shell Context (Optional Debugging) ---
 @app.shell_context_processor
 def make_shell_context():
     return {'db': db, 'User': User, 'JournalEntry': JournalEntry}
 
 # --- Run App Locally ---
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
