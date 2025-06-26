@@ -1,27 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Diary App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 50px;
-            text-align: center;
-        }
-        a {
-            display: block;
-            margin-top: 20px;
-            text-decoration: none;
-            color: blue;
-        }
-    </style>
-</head>
-<body>
-    <h1>Welcome to My Diary</h1>
-    <p>Track your thoughts and experiences.</p>
-
-    <a href="{{ url_for('register') }}">Register</a>
-    <a href="{{ url_for('login') }}">Login</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome to Your Diary App</h1>
+<p>Your personal place to reflect and grow.</p>
+{% endblock %}
