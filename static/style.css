@@ -1,18 +1,73 @@
 body {
-    font-family: 'Segoe UI', sans-serif;
+    background-color: white;
+    color: black;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-textarea {
-    resize: vertical;
-    min-height: 100px;
+.dark-mode {
+    background-color: #121212;
+    color: #f1f1f1;
 }
 
-.card-body {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+nav {
+    background-color: #333;
+    padding: 10px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
+nav ul {
+    list-style-type: none;
+    display: flex;
+    gap: 15px;
+    padding: 0;
+    margin: 0;
 }
+
+nav a, nav button {
+    color: white;
+    background: none;
+    border: none;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+nav a:hover, nav button:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 20px;
+}
+
+.flashes {
+    list-style-type: none;
+    padding: 0;
+}
+
+.flashes li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.success { background-color: #d4edda; color: #155724; }
+.danger { background-color: #f8d7da; color: #721c24; }
+.warning { background-color: #fff3cd; color: #856404; }
+.info    { background-color: #d1ecf1; color: #0c5460; }
+
+/* Dark mode overrides */
+.dark-mode nav {
+    background-color: #222;
+}
+
+.dark-mode .success { background-color: #21442f; color: #d4edda; }
+.dark-mode .danger { background-color: #4b2d2e; color: #f8d7da; }
+.dark-mode .warning { background-color: #5a4b23; color: #fff3cd; }
+.dark-mode .info    { background-color: #1b3e4a; color: #d1ecf1; }
