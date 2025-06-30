@@ -1,56 +1,18 @@
-{% extends "base.html" %}
+
+{% extends 'base.html' %}
 {% block content %}
-<div class="dashboard-container">
-    <h2>Welcome to Your Dashboard</h2>
-
-    <!-- Profile Picture -->
-    <img src="{{ url_for('static', filename='uploads/' + user.profile_pic) }}" alt="Profile Picture"
-         width="120" height="120" style="border-radius: 50%; border: 2px solid #ccc; margin-bottom: 10px;">
-
-    <p>Hello, {{ user.username }}!</p>
-
-    <div class="dashboard-links">
-        <a href="{{ url_for('journal') }}">✏️ My Journal</a>
-        <a href="{{ url_for('upload_profile') }}">📸 Upload Profile Picture</a>
-        <a href="{{ url_for('logout') }}">🚪 Logout</a>
-    </div>
-</div>
-
-<style>
-.dashboard-container {
-    text-align: center;
-    padding: 30px;
-}
-
-.dashboard-links {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.dashboard-links a {
-    background-color: #007bff;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 6px;
-    text-decoration: none;
-    text-align: center;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.dashboard-links a:hover {
-    background-color: #0056b3;
-}
-
-.dark-mode .dashboard-links a {
-    background-color: #0056b3;
-}
-
-.dark-mode .dashboard-links a:hover {
-    background-color: #003e80;
-}
-</style>
+  <h2>Welcome, {{ username }}!</h2>
+  <div class="profile-box">
+    {% if user.profile_picture %}
+      <img src="{{ url_for('static', filename='uploads/' ~ user.profile_picture) }}" alt="Profile Picture" class="profile-pic">
+    {% else %}
+      <p>No profile picture uploaded.</p>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('upload_profile') }}">Upload/Change Profile Picture</a>
+  </div>
+  <div class="dashboard-links">
+    <a href="{{ url_for('journal') }}">Go to Journal</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
 {% endblock %}
