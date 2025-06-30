@@ -1,21 +1,50 @@
+:root {
+    --bg-color: white;
+    --text-color: black;
+    --nav-bg: #333;
+    --nav-text: white;
+    --button-bg: #007bff;
+    --button-text: #fff;
+    --success-bg: #d4edda;
+    --success-text: #155724;
+    --danger-bg: #f8d7da;
+    --danger-text: #721c24;
+    --warning-bg: #fff3cd;
+    --warning-text: #856404;
+    --info-bg: #d1ecf1;
+    --info-text: #0c5460;
+}
+
+[data-theme='dark'] {
+    --bg-color: #121212;
+    --text-color: #f1f1f1;
+    --nav-bg: #222;
+    --nav-text: #f1f1f1;
+    --button-bg: #444;
+    --button-text: #f1f1f1;
+    --success-bg: #21442f;
+    --success-text: #d4edda;
+    --danger-bg: #4b2d2e;
+    --danger-text: #f8d7da;
+    --warning-bg: #5a4b23;
+    --warning-text: #fff3cd;
+    --info-bg: #1b3e4a;
+    --info-text: #d1ecf1;
+}
+
 body {
-    background-color: white;
-    color: black;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark-mode {
-    background-color: #121212;
-    color: #f1f1f1;
-}
-
 nav {
-    background-color: #333;
+    background-color: var(--nav-bg);
     padding: 10px;
-    color: white;
+    color: var(--nav-text);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -30,7 +59,7 @@ nav ul {
 }
 
 nav a, nav button {
-    color: white;
+    color: var(--nav-text);
     background: none;
     border: none;
     text-decoration: none;
@@ -57,17 +86,7 @@ main {
     border-radius: 4px;
 }
 
-.success { background-color: #d4edda; color: #155724; }
-.danger { background-color: #f8d7da; color: #721c24; }
-.warning { background-color: #fff3cd; color: #856404; }
-.info    { background-color: #d1ecf1; color: #0c5460; }
-
-/* Dark mode overrides */
-.dark-mode nav {
-    background-color: #222;
-}
-
-.dark-mode .success { background-color: #21442f; color: #d4edda; }
-.dark-mode .danger { background-color: #4b2d2e; color: #f8d7da; }
-.dark-mode .warning { background-color: #5a4b23; color: #fff3cd; }
-.dark-mode .info    { background-color: #1b3e4a; color: #d1ecf1; }
+.success { background-color: var(--success-bg); color: var(--success-text); }
+.danger  { background-color: var(--danger-bg);  color: var(--danger-text); }
+.warning { background-color: var(--warning-bg); color: var(--warning-text); }
+.info    { background-color: var(--info-bg);    color: var(--info-text); }
