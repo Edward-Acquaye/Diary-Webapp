@@ -2,48 +2,53 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Diary</title>
+    <title>{% block title %}My Diary{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="{% if session.get('dark_mode') %}dark-mode{% endif %}">
     <nav>
-        <a href="{{ url_for('home') }}">Home</a>
-        {% if session.get('user_id') %}
-            <a href="{{ url_for('journal') }}">My Journal</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-            <a href="{{ url_for('register') }}">Register</a>
-            <a href="{{ url_for('login') }}">Login</a>
-        {% endif %}
-        <button id="toggle-theme">🌓</button>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            {% if 'user_id' in session %}
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('journal') }}">My Journal</a></li>
+                <li><a href="{{ url_for('upload_profile') }}">Upload Profile</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+            <li>
+                <button onclick="toggleDarkMode()">🌓</button>
+            </li>
+        </ul>
     </nav>
+
+    {% if session.get('profile_picture') %}
+        <div style="padding: 10px;">
+            <img src="{{ url_for('static', filename='uploads/' ~ session['profile_picture']) }}" alt="Profile Picture" width="60" height="60" style="border-radius: 50%;">
+        </div>
+    {% endif %}
+
     <main>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flashes">
-                    {% for category, message in messages %}
-                        <li class="{{ category }}">{{ message }}</li>
-                    {% endfor %}
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
                 </ul>
             {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
     </main>
-    <script>
-        document.getElementById('toggle-theme').addEventListener('click', function() {
-            const html = document.documentElement;
-            const newTheme = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
 
-        // Load theme from localStorage
-        window.onload = function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        };
+    <script>
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkMode = body.classList.toggle('dark-mode');
+            fetch("{{ url_for('toggle_dark_mode') }}", { method: "POST" });
+        }
     </script>
 </body>
 </html>
-

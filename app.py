@@ -88,6 +88,11 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/toggle_dark_mode', methods=['POST'])
+def toggle_dark_mode():
+    session['dark_mode'] = not session.get('dark_mode', False)
+    return '', 204
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
