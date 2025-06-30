@@ -73,11 +73,20 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             flash('Login successful!', 'success')
-            return redirect(url_for('journal'))
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid credentials. Please try again.', 'danger')
 
     return render_template('login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        flash('Please log in to access your dashboard.', 'warning')
+        return redirect(url_for('login'))
+
+    username = session.get('username', 'User')
+    return render_template('dashboard.html', username=username)
 
 @app.route('/logout')
 def logout():
